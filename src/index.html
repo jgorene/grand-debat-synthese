@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Grand débat - synthèse animée</title>
+    <meta name="description" content="Le Grand Débat National - synthèse par bulles animées">
+    <meta name="author" content="Jean Gorène">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script>
+        const lang = navigator.language;
+        const locale = (lang && lang !== undefined) ? lang.match(/^\w{2}/)[0] : (lang === "de" || lang === "fr" || lang ===
+            "it" || lang === "nl") ? lang : "en";
+
+        function iOSversion() {
+            if (/iP(hone|od|ad)/.test(navigator.platform)) {
+                var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+                return [parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)];
+            }
+        }
+        const versionIos = iOSversion();
+        if (versionIos !== undefined && versionIos[0] <= 10) {
+            var message = (locale === 'fr') ?
+                '<p>Version ios 10 minimum requise pour utiliser cette application. <b>Version détectée ' + versionIos +
+                '</b></p>' :
+                '<p>Version ios 10 minimum to use this app. <b>Version détected ' + versionIos + '</b></p>';
+            document.write(message);
+        }
+    </script>
+</head>
+
+<body>
+    <div id="main_div" class="container-fluid" style="display: none">
+        <div id="infos_div" class="text-center">
+            <div class="jumbotron text-center">
+                <h1 class="display-1" style="color:darkblue">LE GRAND DEBAT</h1>
+                <h1 style="color:darkred; text-shadow: 2px 2px 6px rgb(47, 47, 47)">Synthèse "animée"</h1>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="panel panel-default">
+                            <div class="panel-body text-justify">
+                                <p>
+                                    Proposition de synthèse par bulles animées et colorées.<br>
+                                    Une bulle représente une région et un profil de contribution. La taille des bulles
+                                    dépend du nombre de participants<br>
+                                    Pour les questions fermées, la couleur d'une bulle dépend de la proportion de "oui", de "non" et de "na" (non réponse). <br>
+                                    Pour les questions ouvertes, la couleur est fonction du rapport des occurences de mots-clés au nombre de participants dans un groupe.
+                                </p>
+                                <p>
+                                    <strong>Objectif</strong> : une vue synthétique "la plus parlante possible" sur les
+                                    réponses à une question posée. En un clic !<br>
+                                    C'est essentiellement une version de démonstration réalisée avec de "petits moyens"
+                                    mais avec méthode.<br>
+                                    Bien que le résultat visuel puisse s'avérer intéressant voire "ludique" à l'usage,
+                                    la quantité de données à traiter oblige à beaucoup de circonspection dans
+                                    l’interprétation des résultats.
+                                </p>
+                                <p>
+                                    Réalisé à partir des données ouvertes et accessibles mise à disposition sur <a href="https://granddebat.fr/pages/donnees-ouvertes">le
+                                        site du grand débat</a>.
+                                </p>
+                                <div class="text-center" style="margin-top: 3em;">
+                                    <button id="start_btn" class="btn btn-primary btn-lg" style="margin-top: -0.6em">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div style="margin-top: 2em">
+                        <a class="github-button" href="https://github.com/jgorene/grand-debat-synthese" aria-label="Follow @jgorene on GitHub">
+                            Follow @jgorene</a>
+                    </div>
+                    <div class="inline" style="margin-top:2em">
+                        <p class="inline">
+                            <span style='font-size:18px;'>&#10004;</span> Tablettes &ensp;&ensp;
+                            <span style='font-size:14px;'>&#10006;</span> Mobiles
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dropdownw_div" class="row hidden" style="text-align: center">
+            <div class="dropdown">
+                <button id="dropdown_theme" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span id="theme_selected" title="CHoisir un thème...">ORGANISATION DE LETAT ET DES SERVICES PUBLICS (au 21 mars 2019)</span>
+                </button>
+                <ul id="select_theme" class="dropdown-menu" aria-labelledby="dropdown_theme">
+                    <li><a href="#" data-value="organisation_21mars">ORGANISATION DE LETAT ET DES SERVICES PUBLICS (au 21 mars 2019)</a></li>
+                    <li><a href="#" data-value="democratie_21mars">DEMOCRATIE ET CITOYENNETE (au 21 mars 2019)</a></li>
+                    <li><a href="#" data-value="fiscalite_21mars">FISCALITE ET DEPENSE PUBLIQUES (au 21 mars 2019)</a></li>
+                    <li><a href="#" data-value="transition_21mars">LA_TRANSITION ECOLOGIQUE (au 21 mars 2019)</a></li>
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button id="dropdown_questions" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span id="question_selected" title="Choisir une question...">Choisir une question...</span>
+                </button>
+                <ul id="select_questions" class="dropdown-menu" aria-labelledby="dropdown_questions"></ul>
+            </div>
+        </div>
+        <div id="bubbles_container" class="col-md-12 col-lg-8">
+            <div id="toolbar_div" class="hidden">
+                <div id="toolbar">
+                    <div class="col-xs-12 col-sm-6">
+                        <div id="all" class="button-bubbles active">Sur 3 mois <span id="total_people"></span></div>
+                        <div id="month" class="button-bubbles">Par mois</div>
+                        <button id="sunburst_btn" class="button-bubbles">vers "sunburst"</button>
+                    </div>
+                    <div id="ouinon_div" class="col-xs-12 col-sm-6">
+                        <div id="tendance" class="inline">nombre réponses</div>
+                        <div id="oui"></div>
+                        <div id="non"></div>
+                        <div id="n_a" title="pas de réponse"></div>
+                    </div>
+                    <div id="motcles_div" class="col-xs-12 col-sm-6">
+                        <div class="inline motCle">mot-clés (occurence)</div>
+                        <div id="faible" class="motCle">faible</div>
+                        <div id="forte" class="motCle">forte</div>
+                        <!--                         <button id="wordscloud_btn" class="btn btn-success btn-sm pull-right">nuage</button> -->
+                    </div>
+                </div>
+                    <div class="col-xs-12">
+                        <p id="question_special" style="margin: 1em auto; text-align: center;" ></p>
+                    </div>
+            </div>
+            <div id="bubbles_div" class="container-vis hidden">
+                <div id="vis" class="row"></div>
+                <div class="footer" class="row">
+                    <p>Animated bubble charts in JavaScript with awesome library V5
+                        <a href="https://d3js.org/" title="https://d3js.org/" target="_blank">D3.js</a> by <strong>Mike Bostock</strong>
+                    </p>
+                    <p>Credit template (and all thanks) <strong>Jim Vallandingham </strong>
+                        <a href="https://vallandingham.me/bubble_charts_with_d3v4.html" target="_blank">Blog
+                            Post</a> | <a href="https://github.com/vlandham/bubble_chart_v4" target="_blank">Code</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="sunburst_container" class="col-md-12 col-lg-8 hidden">
+            <div id="sunburst_div" class="text-center">
+                <button id="bubbles_btn" class="button-bubbles" style="margin-top: 0.5em">retour vers bulles animées</button>
+                <h4>Tendance par critère et par regroupements successifs des réponses sur une question</h4>
+                <p>Pour déceler une tendance par critère, les réponses (oui, non, na) sont regroupées par critère successif de l'extérieur vers l'intérieur.<br>
+                    Chaque type de réponse ayant une couleur, le regroupement en proportion permet de définir une dominante  de couleur pour oui, "non" ou très "nuancé".<br>
+                <small>Passez la souris sur le graphique pour voir la répartition en pourcentage.</small></p>
+                <div id="sequence"></div>
+                <div id="chart">
+                    <div id="explanation">
+                        <span id="percentage"></span><br />
+                        <span id="explanation-info"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer" class="row">
+                <p>Sequence sunburst charts in JavaScript with awesome library V5
+                    <a href="https://d3js.org/" title="https://d3js.org/" target="_blank">D3.js</a> by <strong>Mike Bostock</strong>
+                </p>
+                <p>Credit template (and all thanks) <strong>Kerry Rodden’s Blocks</strong>
+                    <a href="https://bl.ocks.org/kerryrodden" target="_blank">bl.ocks.org/kerryrodden</a>
+                </p>
+            </div>
+        </div>
+        <div id="wordscloud_container" class="col-md-12 col-lg-4 hidden">
+            <!--             <div style="height:70px"></div> -->
+            <div id="words_div" class="text-center">
+                <div class="loader loaderClass"></div>
+                <div style="margin-top: 1em">
+                    <button id="export_wordsDiv_btn" class="btn btn-default btn-xs btn-wordsCloud" title="print wordscloud"></button>
+                    <button id="excepts_btn" class="btn btn-default btn-xs btn-wordsCloud" title="random keywords"></button>
+                    <!--                 <button id="wordsDiv_btn" class="btn btn-default btn-xs btn-wordsCloud" title="random keywords"></button> -->
+                    <button id="linkInfo_btn" class="btn btn-default btn-xs pull-right btn-wordsCloud" title="wordcloud2.js"></button>
+                </div>
+                <p id="words_p"></p>
+                <canvas id="cloud_canvas" class="word_cloud">
+            </div>
+            <div id="barplot_div" class="hidden"></div>
+            <div style="height:0.5em"></div>
+            <div id="map_div">
+                <div id="loader_map" class="loader loaderClass"></div>
+                <p id="map_p"></p>
+            </div>
+            <p>Credits map : <a href="https://www.portailsig.org/" target="_blank">portailsig.org</a> & <a href="https://www.datavis.fr/index.php" target="_blank">datavis.fr</a></p>
+        </div>
+        <pre id="output_pre" class="hidden"></pre>
+        <pre id="storeExcepts_pre" class="hidden"></pre>
+    </div>
+    <div id="loader_div">
+        <div class="loader"></div>
+        <br>
+        <p id="textLoader"></p>
+    </div>
+    <div id="tooltipCloud" class="tooltip-wordsCloud" style="opacity: 0; z-index: 1000"></div>
+    <div id="tooltipMap" class="popupMap" style="display: none;">
+    </div>
+    <noscript>
+        <div style="text-align: center;">
+            <p>Pour accéder à toutes les fonctionnalités de ce site, vous devez activer JavaScript.</p>
+            <p>Si vous utilisez une extension de type NoScript vous devez autoriser javascript sur ce site.</p>
+            <p>Vous pouvez aussi suivre les instructions pour <a href="https://www.enable-javascript.com/fr/" target="_blank" title="instructions activation javascript">activer JavaScript dans votre navigateur Web</a>.</p>
+        </div>
+    </noscript>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+
+</html>
